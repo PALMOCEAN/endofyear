@@ -1,0 +1,108 @@
+{
+  "files": [
+    {
+      "filename": "EY5A9196-10653eac",
+      "originalName": "EY5A9196.JPG",
+      "uploadDate": "2025-12-08T15:38:04.056Z",
+      "size": 5929835,
+      "size_formatted": "5.66 MB",
+      "dimensions": {
+        "width": 4051,
+        "height": 2701
+      },
+      "versions": {
+        "original": "images/uploads/original/EY5A9196-10653eac.JPG",
+        "thumbnail": {
+          "webp": "images/uploads/thumbnail/EY5A9196-10653eac.webp",
+          "fallback": "images/uploads/thumbnail/EY5A9196-10653eac.jpg"
+        },
+        "medium": {
+          "webp": "images/uploads/medium/EY5A9196-10653eac.webp",
+          "fallback": "images/uploads/medium/EY5A9196-10653eac.jpg"
+        },
+        "large": {
+          "webp": "images/uploads/large/EY5A9196-10653eac.webp",
+          "fallback": "images/uploads/large/EY5A9196-10653eac.jpg"
+        }
+      }
+    },
+    {
+      "filename": "EQ2A3408-57084212",
+      "originalName": "EQ2A3408.JPG",
+      "uploadDate": "2025-12-08T16:39:29.701Z",
+      "size": 323312,
+      "size_formatted": "315.73 KB",
+      "dimensions": {
+        "width": 1280,
+        "height": 853
+      },
+      "versions": {
+        "original": "images/uploads/original/EQ2A3408-57084212.JPG",
+        "thumbnail": {
+          "webp": "images/uploads/thumbnail/EQ2A3408-57084212.webp",
+          "fallback": "images/uploads/thumbnail/EQ2A3408-57084212.jpg"
+        },
+        "medium": {
+          "webp": "images/uploads/medium/EQ2A3408-57084212.webp",
+          "fallback": "images/uploads/medium/EQ2A3408-57084212.jpg"
+        },
+        "large": {
+          "webp": "images/uploads/large/EQ2A3408-57084212.webp",
+          "fallback": "images/uploads/large/EQ2A3408-57084212.jpg"
+        }
+      }
+    },
+    {
+      "filename": "EY5A8530-ed623a0f",
+      "originalName": "EY5A8530.JPG",
+      "uploadDate": "2025-12-12T15:47:30.371Z",
+      "size": 13205799,
+      "size_formatted": "12.59 MB",
+      "dimensions": {
+        "width": 5760,
+        "height": 3840
+      },
+      "versions": {
+        "original": "images/uploads/original/EY5A8530-ed623a0f.JPG",
+        "thumbnail": {
+          "webp": "images/uploads/thumbnail/EY5A8530-ed623a0f.webp",
+          "fallback": "images/uploads/thumbnail/EY5A8530-ed623a0f.jpg"
+        },
+        "medium": {
+          "webp": "images/uploads/medium/EY5A8530-ed623a0f.webp",
+          "fallback": "images/uploads/medium/EY5A8530-ed623a0f.jpg"
+        },
+        "large": {
+          "webp": "images/uploads/large/EY5A8530-ed623a0f.webp",
+          "fallback": "images/uploads/large/EY5A8530-ed623a0f.jpg"
+        }
+      }
+    },
+    {
+      "filename": "EY5A8590-e7698ce4",
+      "originalName": "EY5A8590.JPG",
+      "uploadDate": "2025-12-12T15:47:38.187Z",
+      "size": 14366644,
+      "size_formatted": "13.7 MB",
+      "dimensions": {
+        "width": 5760,
+        "height": 3840
+      },
+      "versions": {
+        "original": "images/uploads/original/EY5A8590-e7698ce4.JPG",
+        "thumbnail": {
+          "webp": "images/uploads/thumbnail/EY5A8590-e7698ce4.webp",
+          "fallback": "images/uploads/thumbnail/EY5A8590-e7698ce4.jpg"
+        },
+        "medium": {
+          "webp": "images/uploads/medium/EY5A8590-e7698ce4.webp",
+          "fallback": "images/uploads/medium/EY5A8590-e7698ce4.jpg"
+        },
+        "large": {
+          "webp": "images/uploads/large/EY5A8590-e7698ce4.webp",
+          "fallback": "images/uploads/large/EY5A8590-e7698ce4.jpg"
+        }
+      }
+    }
+  ]
+}
