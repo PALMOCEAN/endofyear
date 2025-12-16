@@ -1,0 +1,32 @@
+{
+  "bitrix24": {
+    "webhookUrl": "",
+    "fallbackEmail": "info@graduation.ru",
+    "retryAttempts": 3,
+    "retryDelay": 1000
+  },
+  "analytics": {
+    "yandexMetrikaId": "",
+    "enabled": false,
+    "trackFormSubmissions": true,
+    "trackButtonClicks": true,
+    "trackPhoneCalls": true
+  },
+  "email": {
+    "smtpServer": "",
+    "smtpPort": 587,
+    "smtpSecure": true,
+    "smtpFrom": "",
+    "smtpUsername": "",
+    "smtpPassword": "",
+    "notificationEmails": [
+      "info@graduation.ru"
+    ]
+  },
+  "notifications": {
+    "telegramBotToken": "",
+    "telegramChatId": "",
+    "slackWebhookUrl": "",
+    "discordWebhookUrl": ""
+  }
+}

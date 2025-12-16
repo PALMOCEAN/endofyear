@@ -1,0 +1,41 @@
+[
+  {
+    "image": "images/uploads/large/EY5A9196-10653eac.webp",
+    "src": "images/uploads/large/EY5A9196-10653eac.webp",
+    "thumbnail": "images/uploads/large/EY5A9196-10653eac.webp",
+    "alt": "Тайны Древних - ведьма",
+    "program": "ancients"
+  },
+  {
+    "id": 9,
+    "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23F7931E' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='white' font-family='Arial'%3E🤝%3C/text%3E%3C/svg%3E",
+    "thumbnail": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23F7931E' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='white' font-family='Arial'%3E🤝%3C/text%3E%3C/svg%3E",
+    "alt": "Вызов героев - командная работа",
+    "program": "heroes",
+    "order": 9
+  },
+  {
+    "id": 10,
+    "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%2344A08D' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='white' font-family='Arial'%3E📜%3C/text%3E%3C/svg%3E",
+    "thumbnail": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%2344A08D' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='white' font-family='Arial'%3E📜%3C/text%3E%3C/svg%3E",
+    "alt": "Тайны Древних - древние свитки",
+    "program": "ancients",
+    "order": 10
+  },
+  {
+    "id": 11,
+    "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23FF6B35' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='white' font-family='Arial'%3E⚡%3C/text%3E%3C/svg%3E",
+    "thumbnail": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23FF6B35' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='white' font-family='Arial'%3E⚡%3C/text%3E%3C/svg%3E",
+    "alt": "Вызов героев - энергия и драйв",
+    "program": "heroes",
+    "order": 11
+  },
+  {
+    "id": 12,
+    "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%234ECDC4' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='white' font-family='Arial'%3E🧩%3C/text%3E%3C/svg%3E",
+    "thumbnail": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%234ECDC4' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='white' font-family='Arial'%3E🧩%3C/text%3E%3C/svg%3E",
+    "alt": "Тайны Древних - головоломки",
+    "program": "ancients",
+    "order": 12
+  }
+]

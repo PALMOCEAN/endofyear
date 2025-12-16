@@ -1,0 +1,20 @@
+{
+  "bitrix24": {
+    "webhookUrl": "https://chudesa.bitrix24.ru/rest/15299/nd8n3z86chb1aufy/",
+    "fallbackEmail": "xejkee@gmail.com"
+  },
+  "analytics": {
+    "yandexMetrikaId": "",
+    "enabled": false
+  },
+  "email": {
+    "smtpServer": "",
+    "smtpPort": 587,
+    "smtpSecure": true,
+    "smtpFrom": "",
+    "smtpUsername": "",
+    "smtpPassword": ""
+  },
+  "test": true,
+  "timestamp": "2025-12-12T10:44:16.417Z"
+}
