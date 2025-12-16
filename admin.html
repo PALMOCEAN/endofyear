@@ -1,0 +1,3218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ-панель - Управление контентом</title>
+  
+  <!-- Подключение шрифта Comfortaa -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- GAS Frontend Adapter - ВАЖНО: подключить первым! -->
+  <script src="frontend-adapter.js"></script>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #FF6B35 0%, #00C9A7 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 16px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .tab {
+      padding: 12px 24px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .tab:hover {
+      border-color: #FF6B35;
+      color: #FF6B35;
+    }
+    
+    .tab.active {
+      background: #FF6B35;
+      color: white;
+      border-color: #FF6B35;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+    
+    .card h2 {
+      margin-bottom: 20px;
+      color: #1A1A2E;
+    }
+
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #2D3748;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #FF6B35;
+    }
+    
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 16px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #FF6B35 0%, #E85A2A 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .btn-success {
+      background: #48BB78;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #F56565;
+      color: white;
+    }
+    
+    .json-editor {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+    
+    .image-upload {
+      border: 3px dashed #ddd;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .image-upload:hover {
+      border-color: #FF6B35;
+      background: #fff5f2;
+    }
+    
+    .image-upload.dragover {
+      border-color: #00C9A7;
+      background: #f0fdf9;
+    }
+    
+    .image-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .image-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .image-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .image-item-info {
+      padding: 12px;
+      background: white;
+    }
+    
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .media-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      background: white;
+    }
+    
+    .media-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .media-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .media-item-info {
+      padding: 12px;
+    }
+    
+    .media-item-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .media-item-meta {
+      font-size: 12px;
+      color: #999;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .media-item-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .media-item:hover .media-item-actions {
+      opacity: 1;
+    }
+    
+    .media-item-actions button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .media-item-actions .btn-delete {
+      background: #F56565;
+      color: white;
+    }
+    
+    .media-item-actions .btn-delete:hover {
+      background: #E53E3E;
+    }
+    
+    /* Image Picker */
+    .image-picker-wrapper {
+      border: 2px dashed #ddd;
+      border-radius: 12px;
+      padding: 15px;
+      background: #f8f9fa;
+    }
+    
+    .image-picker-preview {
+      width: 100%;
+      height: 200px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+      border: 2px solid #e0e0e0;
+    }
+    
+    .image-picker-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    .image-picker-preview .no-image {
+      color: #999;
+      font-size: 14px;
+    }
+    
+    .image-picker-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .image-picker-actions .btn {
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .image-item-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .image-item-size {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .alert {
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    
+    .alert-success {
+      background: #C6F6D5;
+      color: #22543D;
+      border: 2px solid #48BB78;
+    }
+    
+    .alert-error {
+      background: #FED7D7;
+      color: #742A2A;
+      border: 2px solid #F56565;
+    }
+    
+    .alert-info {
+      background: #BEE3F8;
+      color: #2C5282;
+      border: 2px solid #4299E1;
+    }
+    
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .item-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    
+    .item-card {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .item-card:hover {
+      border-color: #FF6B35;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .item-card h3 {
+      margin-bottom: 10px;
+      color: #1A1A2E;
+    }
+    
+    .item-card p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .modal-header h2 {
+      margin: 0;
+      color: #1A1A2E;
+    }
+    
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 32px;
+      cursor: pointer;
+      color: #999;
+      line-height: 1;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+    }
+    
+    .close-modal:hover {
+      color: #FF6B35;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .form-row-full {
+      grid-column: 1 / -1;
+    }
+    
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .feature-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    
+    .feature-item input {
+      flex: 1;
+    }
+    
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+    
+    .save-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #48BB78;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 50px;
+      box-shadow: 0 4px 20px rgba(72, 187, 120, 0.4);
+      font-weight: 600;
+      display: none;
+      z-index: 2000;
+    }
+    
+    .save-indicator.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Админ-панель</h1>
+      <p>Управление контентом лендинга выпускных мероприятий</p>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('programs', this)">Программы</button>
+      <button class="tab" onclick="switchTab('testimonials', this)">Отзывы</button>
+      <button class="tab" onclick="switchTab('faq', this)">FAQ</button>
+      <button class="tab" onclick="switchTab('gallery', this)">Галерея</button>
+      <button class="tab" onclick="switchTab('blocks-manager', this)">Управление блоками</button>
+      <button class="tab" onclick="switchTab('integrations', this)">Интеграции</button>
+      <button class="tab" onclick="switchTab('settings', this)">Настройки</button>
+      <button class="tab" onclick="switchTab('media', this)">Медиа</button>
+      <button class="tab" onclick="switchTab('backups', this)">Резервные копии</button>
+      <button class="tab" onclick="switchTab('json', this)">JSON редактор</button>
+    </div>
+    
+    <div id="alert-container"></div>
+    
+    <!-- Save Indicator -->
+    <div id="save-indicator" class="save-indicator">
+      Изменения сохранены
+    </div>
+    
+    <!-- Modals -->
+    <!-- Program Edit Modal -->
+    <div id="program-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="program-modal-title">Редактировать программу</h2>
+          <button class="close-modal" onclick="closeModal('program-modal')">&times;</button>
+        </div>
+        <form id="program-form" onsubmit="saveProgram(event)">
+          <input type="hidden" id="program-index">
+          
+          <div class="form-group">
+            <label>Название программы *</label>
+            <input type="text" id="program-name" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Слоган *</label>
+            <input type="text" id="program-tagline" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Описание *</label>
+            <textarea id="program-description" required></textarea>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Возраст *</label>
+              <input type="text" id="program-age" placeholder="1-4 класс" required>
+            </div>
+            
+            <div class="form-group">
+              <label>Длительность *</label>
+              <input type="text" id="program-duration" placeholder="3-4 часа" required>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Базовая цена (₽) <small style="color: #666;">(необязательно)</small></label>
+              <input type="number" id="program-base-price" placeholder="Оставьте пустым для скрытия цен">
+            </div>
+            
+            <div class="form-group">
+              <label>Цена за человека (₽) *</label>
+              <input type="number" id="program-per-person" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Минимальная группа *</label>
+            <input type="number" id="program-min-group" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Особенности программы</label>
+            <div id="program-features-list" style="margin-bottom: 15px;">
+              <!-- Features will be added here dynamically -->
+            </div>
+            <button type="button" class="btn btn-secondary btn-small" onclick="addProgramFeature()">+ Добавить особенность</button>
+          </div>
+          
+          <div class="form-group">
+            <label>Изображение</label>
+            <input type="text" id="program-image" placeholder="/images/program-1.webp" style="display: none;">
+            <div class="image-picker-wrapper">
+              <div class="image-picker-preview" id="program-image-preview">
+                <span class="no-image">Изображение не выбрано</span>
+              </div>
+              <div class="image-picker-actions">
+                <button type="button" class="btn btn-outline" onclick="openMediaPicker('program-image')">Выбрать из медиа</button>
+                <button type="button" class="btn btn-outline" onclick="clearImagePicker('program-image')">Очистить</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('program-modal')">Отмена</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Testimonial Edit Modal -->
+    <div id="testimonial-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="testimonial-modal-title">Добавить отзыв</h2>
+          <button class="close-modal" onclick="closeModal('testimonial-modal')">&times;</button>
+        </div>
+        <form id="testimonial-form" onsubmit="saveTestimonial(event)">
+          <input type="hidden" id="testimonial-index">
+          
+          <div class="form-group">
+            <label>Имя автора *</label>
+            <input type="text" id="testimonial-author" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Информация о школе *</label>
+            <input type="text" id="testimonial-school" placeholder="Школа №123, 4 класс" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Программа *</label>
+            <select id="testimonial-program" required>
+              <option value="Вызов героев">Вызов героев</option>
+              <option value="Тайны Древних">Тайны Древних</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Рейтинг *</label>
+            <select id="testimonial-rating" required>
+              <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+              <option value="4">⭐⭐⭐⭐ (4)</option>
+              <option value="3">⭐⭐⭐ (3)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Текст отзыва *</label>
+            <textarea id="testimonial-text" rows="5" required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Фото (URL)</label>
+            <input type="text" id="testimonial-photo" placeholder="/images/testimonial-1.webp">
+          </div>
+          
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('testimonial-modal')">Отмена</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- FAQ Edit Modal -->
+    <div id="faq-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="faq-modal-title">Добавить вопрос</h2>
+          <button class="close-modal" onclick="closeModal('faq-modal')">&times;</button>
+        </div>
+        <form id="faq-form" onsubmit="saveFaq(event)">
+          <input type="hidden" id="faq-index">
+          
+          <div class="form-group">
+            <label>Вопрос *</label>
+            <input type="text" id="faq-question" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Ответ *</label>
+            <textarea id="faq-answer" rows="4" required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Категория *</label>
+            <select id="faq-category" required>
+              <option value="Общие вопросы">Общие вопросы</option>
+              <option value="Программы">Программы</option>
+              <option value="Цены и оплата">Цены и оплата</option>
+              <option value="Организация">Организация</option>
+              <option value="Безопасность">Безопасность</option>
+            </select>
+          </div>
+          
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('faq-modal')">Отмена</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Gallery Edit Modal -->
+    <div id="gallery-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="gallery-modal-title">Добавить изображение в галерею</h2>
+          <button class="close-modal" onclick="closeModal('gallery-modal')">&times;</button>
+        </div>
+        <form id="gallery-form" onsubmit="saveGalleryItem(event)">
+          <input type="hidden" id="gallery-index">
+          
+          <div class="form-group">
+            <label>Изображение (полное) *</label>
+            <input type="text" id="gallery-image" placeholder="/images/gallery-1.webp" required style="display: none;">
+            <div class="image-picker-wrapper">
+              <div class="image-picker-preview" id="gallery-image-preview">
+                <span class="no-image">Изображение не выбрано</span>
+              </div>
+              <div class="image-picker-actions">
+                <button type="button" class="btn btn-outline" onclick="openMediaPicker('gallery-image')">Выбрать из медиа</button>
+                <button type="button" class="btn btn-outline" onclick="clearImagePicker('gallery-image')">Очистить</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Миниатюра *</label>
+            <input type="text" id="gallery-thumbnail" placeholder="/images/gallery-1-thumb.webp" required style="display: none;">
+            <div class="image-picker-wrapper">
+              <div class="image-picker-preview" id="gallery-thumbnail-preview">
+                <span class="no-image">Миниатюра не выбрана</span>
+              </div>
+              <div class="image-picker-actions">
+                <button type="button" class="btn btn-outline" onclick="openMediaPicker('gallery-thumbnail')">Выбрать из медиа</button>
+                <button type="button" class="btn btn-outline" onclick="clearImagePicker('gallery-thumbnail')">Очистить</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Описание (alt текст) *</label>
+            <input type="text" id="gallery-alt" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Программа *</label>
+            <select id="gallery-program" required>
+              <option value="heroes">Вызов героев</option>
+              <option value="ancients">Тайны Древних</option>
+              <option value="both">Обе программы</option>
+            </select>
+          </div>
+          
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('gallery-modal')">Отмена</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Programs Tab -->
+    <div id="programs-tab" class="tab-content active">
+      <div class="card">
+        <h2>Управление программами</h2>
+        <div id="programs-list" class="item-list"></div>
+      </div>
+    </div>
+    
+    <!-- Testimonials Tab -->
+    <div id="testimonials-tab" class="tab-content">
+      <div class="card">
+        <h2>Управление отзывами</h2>
+        <button class="btn btn-primary" onclick="showAddTestimonialForm()">+ Добавить отзыв</button>
+        <div id="testimonials-list" class="item-list" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+    
+    <!-- FAQ Tab -->
+    <div id="faq-tab" class="tab-content">
+      <div class="card">
+        <h2>Управление FAQ</h2>
+        <button class="btn btn-primary" onclick="showAddFaqForm()">+ Добавить вопрос</button>
+        <div id="faq-list" class="item-list" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+    
+    <!-- Gallery Tab -->
+    <div id="gallery-tab" class="tab-content">
+      <div class="card">
+        <h2>Управление галереей</h2>
+        <button class="btn btn-primary" onclick="showAddGalleryForm()">+ Добавить изображение</button>
+        <div id="gallery-list" class="image-preview" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+    
+    <!-- Settings Tab -->
+    <div id="settings-tab" class="tab-content">
+      <div class="card">
+        <h2>Настройки главной страницы</h2>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 20px;">Фон главного экрана</h3>
+        <p style="color: #666; margin-bottom: 20px;">Настройте фоновое изображение для секции "Выпускной на природе для начальной школы"</p>
+        
+        <div class="form-group">
+          <label>Фоновое изображение</label>
+          <input type="text" id="settings-hero-bg" placeholder="Путь к изображению" style="display: none;">
+          <div class="image-picker-wrapper">
+            <div class="image-picker-preview" id="settings-hero-bg-preview" style="height: 300px;">
+              <span class="no-image">Изображение не выбрано (используется градиент)</span>
+            </div>
+            <div class="image-picker-actions">
+              <button type="button" class="btn btn-outline" onclick="openMediaPicker('settings-hero-bg')">Выбрать из медиа</button>
+              <button type="button" class="btn btn-outline" onclick="clearImagePicker('settings-hero-bg')">Очистить</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Размытие фона (blur): <span id="blur-value">5</span>px</label>
+          <input type="range" id="settings-blur" min="0" max="20" value="5" style="width: 100%;" oninput="updateBlurValue(this.value)">
+          <p style="font-size: 14px; color: #666; margin-top: 8px;">0 = без размытия, 20 = максимальное размытие</p>
+        </div>
+        
+        <div class="form-group">
+          <label>Затемнение фона: <span id="overlay-value">60</span>%</label>
+          <input type="range" id="settings-overlay" min="0" max="100" value="60" style="width: 100%;" oninput="updateOverlayValue(this.value)">
+          <p style="font-size: 14px; color: #666; margin-top: 8px;">0 = без затемнения, 100 = полностью черный</p>
+        </div>
+        
+        <div class="actions">
+          <button class="btn btn-primary" onclick="saveSettings()">Сохранить настройки</button>
+          <button class="btn btn-secondary" onclick="loadSettings()">Отменить</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Media Tab -->
+    <div id="media-tab" class="tab-content">
+      <div class="card">
+        <h2>Медиа-библиотека</h2>
+        <div class="alert alert-info">
+          <strong>Автоматическая оптимизация:</strong> При загрузке создаются 4 версии (original, large, medium, thumbnail) в WebP + JPEG fallback
+        </div>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+          <input type="file" id="mediaFileInput" multiple accept="image/*" style="display: none;" onchange="uploadMediaFiles(this.files)">
+          <button class="btn btn-primary" onclick="document.getElementById('mediaFileInput').click()">
+            Загрузить изображения
+          </button>
+          <input type="text" id="mediaSearch" placeholder="Поиск..." style="flex: 1; min-width: 200px; padding: 10px; border: 2px solid #ddd; border-radius: 8px;" oninput="searchMedia(this.value)">
+        </div>
+        
+        <div id="mediaStats" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; display: none;">
+          <strong>Статистика:</strong> <span id="mediaCount">0</span> файлов, <span id="mediaTotalSize">0</span>
+        </div>
+        
+        <div id="mediaGrid" class="media-grid">
+          <p style="text-align: center; color: #999; padding: 40px;">Загрузите изображения чтобы начать</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Backups Tab -->
+    <div id="backups-tab" class="tab-content">
+      <div class="card">
+        <h2>Резервные копии</h2>
+        <div class="alert alert-info">
+          <strong>Автоматические бэкапы:</strong> При каждом сохранении создается резервная копия. Хранится максимум 5 последних версий каждого файла.
+        </div>
+        
+        <button class="btn btn-secondary" onclick="loadBackups()" style="margin-bottom: 20px;">
+          Обновить список
+        </button>
+        
+        <div id="backups-list"></div>
+      </div>
+    </div>
+    
+    <!-- JSON Editor Tab -->
+    <div id="json-tab" class="tab-content">
+      <div class="card">
+        <h2>JSON редактор</h2>
+        <p style="margin-bottom: 20px; color: #666;">Прямое редактирование JSON файлов. Будьте осторожны!</p>
+        
+        <div class="form-group">
+          <label>Выберите файл:</label>
+          <select id="json-file-select" onchange="loadJsonFile()">
+            <option value="programs">programs.json</option>
+            <option value="testimonials">testimonials.json</option>
+            <option value="faq">faq.json</option>
+            <option value="gallery">gallery.json</option>
+          </select>
+        </div>
+        
+        <div class="json-editor" id="json-editor" contenteditable="true"></div>
+        
+        <div class="actions">
+          <button class="btn btn-primary" onclick="saveJson()">Сохранить изменения</button>
+          <button class="btn btn-secondary" onclick="loadJsonFile()">Отменить</button>
+          <button class="btn btn-success" onclick="downloadJson()">Скачать JSON</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blocks Manager Tab -->
+    <div id="blocks-manager-tab" class="tab-content">
+      <div class="card">
+        <h2>Управление блоками лендинга</h2>
+        <p style="margin-bottom: 30px; color: #666; line-height: 1.6;">
+          Включайте и отключайте блоки лендинга для A/B тестирования и оптимизации конверсии. 
+          Изменения применяются мгновенно после сохранения.
+        </p>
+        
+        <div id="blocks-list" style="display: grid; gap: 16px;">
+          <!-- Blocks will be loaded dynamically -->
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+          <button class="btn btn-primary" onclick="saveBlocksSettings()" style="padding: 16px 32px; font-size: 16px;">
+            💾 Сохранить настройки
+          </button>
+          <button class="btn btn-secondary" onclick="createBlocksBackup()" style="padding: 16px 32px; font-size: 16px; margin-left: 16px;">
+            📋 Создать резервную копию
+          </button>
+          <button class="btn btn-outline" onclick="resetBlocksSettings()" style="padding: 16px 32px; font-size: 16px; margin-left: 16px;">
+            🔄 Сбросить к умолчанию
+          </button>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef;">
+          <h4 style="margin: 0 0 15px 0; color: #495057;">🛡️ Система защиты от потери данных</h4>
+          <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 14px;">
+            Настройки автоматически восстанавливаются из резервной копии при обнаружении потери данных.
+          </p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn-outline btn-small" onclick="validateBlocksIntegrity()" style="font-size: 14px;">
+              🔍 Проверить целостность
+            </button>
+            <button class="btn btn-outline btn-small" onclick="forceRecoveryFromDefault()" style="font-size: 14px;">
+              🚑 Принудительное восстановление
+            </button>
+          </div>
+        </div>
+        
+        <div id="blocks-result" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+
+    <!-- Integrations Tab -->
+    <div id="integrations-tab" class="tab-content">
+      <div class="card">
+        <h2>Настройки интеграций</h2>
+        <p style="margin-bottom: 30px; color: #666; line-height: 1.6;">
+          Настройте интеграции с внешними сервисами для автоматической обработки заявок.
+        </p>
+        
+        <!-- Bitrix24 Integration -->
+        <div style="margin-bottom: 40px;">
+          <h3 style="margin-bottom: 20px; color: #1A1A2E; display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 24px;">🔗</span>
+            Bitrix24 CRM
+          </h3>
+          
+          <div class="form-group">
+            <label>Webhook URL Bitrix24 *</label>
+            <input 
+              type="url" 
+              id="bitrix-webhook-url" 
+              placeholder="https://chudesa.bitrix24.ru/rest/15299/nd8n3z86chb1aufy/"
+              style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;"
+            >
+            <small style="color: #666; font-size: 14px;">
+              Полная ссылка на webhook из Bitrix24. Получить: Приложения → Разработчикам → Входящий webhook
+            </small>
+          </div>
+          
+          <div class="form-group">
+            <label>Email для резервной отправки</label>
+            <input 
+              type="email" 
+              id="bitrix-fallback-email" 
+              placeholder="info@graduation.ru"
+              style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;"
+            >
+            <small style="color: #666; font-size: 14px;">Email для отправки заявок если Bitrix24 недоступен</small>
+          </div>
+          
+          <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="testBitrix24Connection()">
+              🧪 Тестировать подключение
+            </button>
+            <button class="btn btn-primary" onclick="saveBitrix24Settings()">
+              💾 Сохранить настройки
+            </button>
+          </div>
+        </div>
+        
+        <!-- Analytics Integration -->
+        <div style="margin-bottom: 40px;">
+          <h3 style="margin-bottom: 20px; color: #1A1A2E; display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 24px;">📊</span>
+            Яндекс.Метрика
+          </h3>
+          
+          <div class="form-group">
+            <label>ID счетчика Яндекс.Метрики</label>
+            <input 
+              type="text" 
+              id="yandex-metrika-id" 
+              placeholder="12345678"
+              style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;"
+            >
+            <small style="color: #666; font-size: 14px;">ID счетчика для отслеживания конверсий</small>
+          </div>
+          
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="analytics-enabled" style="margin: 0;">
+              Включить отслеживание событий
+            </label>
+            <small style="color: #666; font-size: 14px;">Автоматическое отслеживание отправки форм и кликов по кнопкам</small>
+          </div>
+          
+          <button class="btn btn-primary" onclick="saveAnalyticsSettings()">
+            💾 Сохранить настройки
+          </button>
+        </div>
+        
+        <!-- Email Integration -->
+        <div style="margin-bottom: 40px;">
+          <h3 style="margin-bottom: 20px; color: #1A1A2E; display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 24px;">📧</span>
+            Email уведомления
+          </h3>
+          
+          <div class="form-group">
+            <label>SMTP сервер</label>
+            <input 
+              type="text" 
+              id="smtp-server" 
+              placeholder="smtp.gmail.com"
+              style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;"
+            >
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label>Порт</label>
+              <input 
+                type="number" 
+                id="smtp-port" 
+                placeholder="587"
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="smtp-secure" style="margin: 0;">
+                Использовать SSL/TLS
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Email отправителя</label>
+            <input 
+              type="email" 
+              id="smtp-from" 
+              placeholder="noreply@graduation.ru"
+              style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;"
+            >
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label>Логин SMTP</label>
+              <input 
+                type="text" 
+                id="smtp-username" 
+                placeholder="username@gmail.com"
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label>Пароль SMTP</label>
+              <input 
+                type="password" 
+                id="smtp-password" 
+                placeholder="••••••••••••"
+                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;"
+              >
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="testEmailConnection()">
+              🧪 Тестировать отправку
+            </button>
+            <button class="btn btn-primary" onclick="saveEmailSettings()">
+              💾 Сохранить настройки
+            </button>
+          </div>
+        </div>
+        
+        <!-- Integration Status -->
+        <div style="background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 20px;">
+          <h4 style="margin: 0 0 15px 0; color: #495057;">📋 Статус интеграций</h4>
+          <div id="integrations-status">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span>Bitrix24 CRM:</span>
+              <span id="bitrix-status" style="color: #dc3545;">❌ Не настроено</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span>Яндекс.Метрика:</span>
+              <span id="analytics-status" style="color: #dc3545;">❌ Не настроено</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Email уведомления:</span>
+              <span id="email-status" style="color: #dc3545;">❌ Не настроено</span>
+            </div>
+          </div>
+        </div>
+        
+        <div id="integrations-result" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Current data
+    let programsData = [];
+    let testimonialsData = [];
+    let faqData = [];
+    let galleryData = [];
+    let settingsData = { hero: { backgroundImage: '', blurAmount: 5, overlayOpacity: 0.6 } };
+    
+    // Load all data on page load
+    async function loadAllData() {
+      try {
+        const [programs, testimonials, faq, gallery, settings] = await Promise.all([
+          fetch('data/programs.json').then(r => r.json()),
+          fetch('data/testimonials.json').then(r => r.json()),
+          fetch('data/faq.json').then(r => r.json()),
+          fetch('data/gallery.json').then(r => r.json()),
+          fetch('data/settings.json').then(r => r.json()).catch(() => ({ hero: { backgroundImage: '', blurAmount: 5, overlayOpacity: 0.6 } }))
+        ]);
+        
+        programsData = programs;
+        testimonialsData = testimonials;
+        faqData = faq;
+        galleryData = gallery;
+        settingsData = settings;
+        
+        renderPrograms();
+        renderTestimonials();
+        renderFaq();
+        renderGallery();
+        
+        showAlert('Данные успешно загружены', 'success');
+        console.log('All data loaded successfully');
+      } catch (error) {
+        showAlert('Ошибка загрузки данных: ' + error.message, 'error');
+        console.error('Error loading data:', error);
+      }
+    }
+    
+    // Modal functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+    
+    // Save indicator
+    function showSaveIndicator() {
+      const indicator = document.getElementById('save-indicator');
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 2000);
+    }
+    
+    function hideSaveIndicator() {
+      const indicator = document.getElementById('save-indicator');
+      indicator.classList.remove('show');
+    }
+    
+    // Save JSON to server via API
+    async function saveJsonToServer(filename, data) {
+      try {
+        const response = await window.GAS_API.call('/api/save-data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            filename: filename,
+            content: JSON.stringify(data, null, 2)
+          })
+        });
+        
+        // Проверяем статус ответа
+        if (!response.ok) {
+          // Пытаемся получить детали ошибки от сервера
+          let errorDetails = `HTTP ${response.status}: ${response.statusText}`;
+          try {
+            const errorData = await response.json();
+            if (errorData.error) {
+              errorDetails = errorData.error;
+            }
+          } catch (e) {
+            // Если не удалось распарсить JSON ошибки, используем стандартное сообщение
+          }
+          throw new Error(errorDetails);
+        }
+        
+        // Проверяем Content-Type
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error('Сервер вернул не JSON ответ. Проверьте, что сервер запущен.');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showAlert(`Файл ${filename} сохранен! ${result.backup_created ? 'Создан бэкап: ' + result.backup_created : ''}`, 'success');
+          return true;
+        } else {
+          showAlert('Ошибка сохранения: ' + result.error, 'error');
+          return false;
+        }
+      } catch (error) {
+        if (error.message.includes('Failed to fetch')) {
+          showAlert('Ошибка: Сервер недоступен. Убедитесь, что сервер запущен (npm start)', 'error');
+        } else {
+          showAlert('Ошибка соединения с сервером: ' + error.message, 'error');
+        }
+        console.error('Save error:', error);
+        return false;
+      }
+    }
+    
+    // Fallback: download JSON if API not available
+    function downloadJsonFallback(filename, data) {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      showAlert('Файл скачан. API недоступен, замените файл вручную в папке data/', 'info');
+    }
+    
+    // Tab switching - moved to end of file with A/B testing integration
+    
+    // Alert system
+    function showAlert(message, type = 'info') {
+      const container = document.getElementById('alert-container');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      container.appendChild(alert);
+      
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+    
+    // ========== PROGRAMS ==========
+    function renderPrograms() {
+      const container = document.getElementById('programs-list');
+      if (!container) {
+        console.error('programs-list container not found');
+        return;
+      }
+      container.innerHTML = programsData.map((program, index) => `
+        <div class="item-card">
+          <h3>${program.name}</h3>
+          <p><strong>Слоган:</strong> ${program.tagline}</p>
+          <p><strong>Цена:</strong> ${program.pricing && program.pricing.basePrice ? `от ${program.pricing.basePrice.toLocaleString('ru-RU')} ₽` : 'Не указана'}</p>
+          <p><strong>Возраст:</strong> ${program.ageRange}</p>
+          <p><strong>Длительность:</strong> ${program.duration}</p>
+          <div class="actions">
+            <button class="btn btn-secondary" onclick="editProgram(${index})">✏️ Редактировать</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function editProgram(index) {
+      const program = programsData[index];
+      
+      document.getElementById('program-index').value = index;
+      document.getElementById('program-name').value = program.name;
+      document.getElementById('program-tagline').value = program.tagline;
+      document.getElementById('program-description').value = program.description;
+      document.getElementById('program-age').value = program.ageRange;
+      document.getElementById('program-duration').value = program.duration;
+      document.getElementById('program-base-price').value = program.pricing && program.pricing.basePrice ? program.pricing.basePrice : '';
+      document.getElementById('program-per-person').value = program.pricing.perPerson || program.pricing.pricePerChild || 0;
+      document.getElementById('program-min-group').value = program.pricing.minGroup || program.pricing.minChildren || 0;
+      
+      // Загружаем features
+      loadProgramFeatures(program.features || []);
+      
+      document.getElementById('program-image').value = program.image || program.images?.[0] || '';
+      updateImagePickerPreview('program-image');
+      
+      document.getElementById('program-modal-title').textContent = 'Редактировать программу';
+      openModal('program-modal');
+    }
+    
+    function loadProgramFeatures(features) {
+      const container = document.getElementById('program-features-list');
+      container.innerHTML = '';
+      
+      if (features.length === 0) {
+        addProgramFeature();
+        return;
+      }
+      
+      features.forEach((feature, index) => {
+        if (typeof feature === 'object') {
+          addProgramFeature(feature.icon || '', feature.title || '', feature.description || '');
+        } else {
+          addProgramFeature('', feature, '');
+        }
+      });
+    }
+    
+    function addProgramFeature(icon = '', title = '', description = '') {
+      const container = document.getElementById('program-features-list');
+      const index = container.children.length;
+      
+      const featureDiv = document.createElement('div');
+      featureDiv.className = 'feature-item';
+      featureDiv.style.cssText = 'border: 2px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f9f9f9;';
+      featureDiv.innerHTML = `
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <input type="text" placeholder="Иконка (эмодзи)" value="${icon}" style="width: 80px;" class="feature-icon-input">
+          <input type="text" placeholder="Название" value="${title}" style="flex: 1;" class="feature-title-input" required>
+          <button type="button" class="btn btn-danger btn-small" onclick="removeProgramFeature(this)" style="padding: 8px 12px;">✕</button>
+        </div>
+        <textarea placeholder="Описание" rows="2" style="width: 100%; padding: 8px; border: 2px solid #e0e0e0; border-radius: 8px;" class="feature-description-input">${description}</textarea>
+      `;
+      
+      container.appendChild(featureDiv);
+    }
+    
+    function removeProgramFeature(button) {
+      button.closest('.feature-item').remove();
+    }
+    
+    function getProgramFeatures() {
+      const container = document.getElementById('program-features-list');
+      const features = [];
+      
+      container.querySelectorAll('.feature-item').forEach(item => {
+        const icon = item.querySelector('.feature-icon-input').value.trim();
+        const title = item.querySelector('.feature-title-input').value.trim();
+        const description = item.querySelector('.feature-description-input').value.trim();
+        
+        if (title) {
+          features.push({
+            icon: icon || '✓',
+            title: title,
+            description: description
+          });
+        }
+      });
+      
+      return features;
+    }
+    
+    async function saveProgram(event) {
+      event.preventDefault();
+      
+      const index = document.getElementById('program-index').value;
+      const program = programsData[index];
+      
+      // Обновляем только редактируемые поля, сохраняя остальную структуру
+      const updatedProgram = {
+        ...program,
+        name: document.getElementById('program-name').value,
+        tagline: document.getElementById('program-tagline').value,
+        description: document.getElementById('program-description').value,
+        ageRange: document.getElementById('program-age').value,
+        duration: document.getElementById('program-duration').value,
+        pricing: {
+          ...program.pricing,
+          ...(document.getElementById('program-base-price').value ? { 
+            basePrice: parseInt(document.getElementById('program-base-price').value),
+            perPerson: parseInt(document.getElementById('program-per-person').value),
+            pricePerChild: parseInt(document.getElementById('program-per-person').value)
+          } : {}),
+          minGroup: parseInt(document.getElementById('program-min-group').value),
+          minChildren: parseInt(document.getElementById('program-min-group').value)
+        },
+        features: getProgramFeatures()
+      };
+      
+      // Обновляем image только если указан
+      const imageValue = document.getElementById('program-image').value;
+      if (imageValue) {
+        if (program.image) {
+          updatedProgram.image = imageValue;
+        } else if (program.images) {
+          updatedProgram.images = [imageValue, ...program.images.slice(1)];
+        }
+      }
+      
+      programsData[index] = updatedProgram;
+      
+      // Сохраняем на сервер
+      const saved = await saveJsonToServer('programs.json', programsData);
+      
+      if (saved) {
+        renderPrograms();
+        closeModal('program-modal');
+        showSaveIndicator();
+      }
+    }
+    
+    // ========== TESTIMONIALS ==========
+    function renderTestimonials() {
+      const container = document.getElementById('testimonials-list');
+      if (!container) {
+        console.error('testimonials-list container not found');
+        return;
+      }
+      container.innerHTML = testimonialsData.map((testimonial, index) => `
+        <div class="item-card">
+          <h3>${testimonial.authorName}</h3>
+          <p><strong>Школа:</strong> ${testimonial.schoolInfo}</p>
+          <p><strong>Программа:</strong> ${testimonial.program}</p>
+          <p><strong>Рейтинг:</strong> ${'⭐'.repeat(testimonial.rating)}</p>
+          <p>${testimonial.text}</p>
+          <div class="actions">
+            <button class="btn btn-secondary" onclick="editTestimonial(${index})">✏️ Редактировать</button>
+            <button class="btn btn-danger" onclick="deleteTestimonial(${index})">🗑️ Удалить</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function showAddTestimonialForm() {
+      document.getElementById('testimonial-form').reset();
+      document.getElementById('testimonial-index').value = '';
+      document.getElementById('testimonial-modal-title').textContent = 'Добавить отзыв';
+      openModal('testimonial-modal');
+    }
+    
+    function editTestimonial(index) {
+      const testimonial = testimonialsData[index];
+      
+      document.getElementById('testimonial-index').value = index;
+      document.getElementById('testimonial-author').value = testimonial.authorName;
+      document.getElementById('testimonial-school').value = testimonial.schoolInfo;
+      document.getElementById('testimonial-program').value = testimonial.program;
+      document.getElementById('testimonial-rating').value = testimonial.rating;
+      document.getElementById('testimonial-text').value = testimonial.text;
+      document.getElementById('testimonial-photo').value = testimonial.photo || '';
+      
+      document.getElementById('testimonial-modal-title').textContent = 'Редактировать отзыв';
+      openModal('testimonial-modal');
+    }
+    
+    async function saveTestimonial(event) {
+      event.preventDefault();
+      
+      const index = document.getElementById('testimonial-index').value;
+      const testimonial = {
+        authorName: document.getElementById('testimonial-author').value,
+        schoolInfo: document.getElementById('testimonial-school').value,
+        program: document.getElementById('testimonial-program').value,
+        rating: parseInt(document.getElementById('testimonial-rating').value),
+        text: document.getElementById('testimonial-text').value,
+        photo: document.getElementById('testimonial-photo').value || '/images/testimonial-default.webp'
+      };
+      
+      if (index === '') {
+        testimonialsData.push(testimonial);
+      } else {
+        testimonialsData[index] = testimonial;
+      }
+      
+      const saved = await saveJsonToServer('testimonials.json', testimonialsData);
+      
+      if (saved) {
+        renderTestimonials();
+        closeModal('testimonial-modal');
+        showSaveIndicator();
+      }
+    }
+    
+    async function deleteTestimonial(index) {
+      if (confirm('Удалить этот отзыв?')) {
+        testimonialsData.splice(index, 1);
+        
+        const saved = await saveJsonToServer('testimonials.json', testimonialsData);
+        
+        if (saved) {
+          renderTestimonials();
+          showSaveIndicator();
+        }
+      }
+    }
+    
+    // ========== FAQ ==========
+    function renderFaq() {
+      const container = document.getElementById('faq-list');
+      if (!container) {
+        console.error('faq-list container not found');
+        return;
+      }
+      container.innerHTML = faqData.map((item, index) => `
+        <div class="item-card">
+          <h3>${item.question}</h3>
+          <p><strong>Категория:</strong> ${item.category}</p>
+          <p>${item.answer}</p>
+          <div class="actions">
+            <button class="btn btn-secondary" onclick="editFaq(${index})">✏️ Редактировать</button>
+            <button class="btn btn-danger" onclick="deleteFaq(${index})">🗑️ Удалить</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function showAddFaqForm() {
+      document.getElementById('faq-form').reset();
+      document.getElementById('faq-index').value = '';
+      document.getElementById('faq-modal-title').textContent = 'Добавить вопрос';
+      openModal('faq-modal');
+    }
+    
+    function editFaq(index) {
+      const faq = faqData[index];
+      
+      document.getElementById('faq-index').value = index;
+      document.getElementById('faq-question').value = faq.question;
+      document.getElementById('faq-answer').value = faq.answer;
+      document.getElementById('faq-category').value = faq.category;
+      
+      document.getElementById('faq-modal-title').textContent = 'Редактировать вопрос';
+      openModal('faq-modal');
+    }
+    
+    async function saveFaq(event) {
+      event.preventDefault();
+      
+      const index = document.getElementById('faq-index').value;
+      const faq = {
+        question: document.getElementById('faq-question').value,
+        answer: document.getElementById('faq-answer').value,
+        category: document.getElementById('faq-category').value
+      };
+      
+      if (index === '') {
+        faqData.push(faq);
+      } else {
+        faqData[index] = faq;
+      }
+      
+      const saved = await saveJsonToServer('faq.json', faqData);
+      
+      if (saved) {
+        renderFaq();
+        closeModal('faq-modal');
+        showSaveIndicator();
+      }
+    }
+    
+    async function deleteFaq(index) {
+      if (confirm('Удалить этот вопрос?')) {
+        faqData.splice(index, 1);
+        
+        const saved = await saveJsonToServer('faq.json', faqData);
+        
+        if (saved) {
+          renderFaq();
+          showSaveIndicator();
+        }
+      }
+    }
+    
+    // ========== GALLERY ==========
+    function renderGallery() {
+      const container = document.getElementById('gallery-list');
+      if (!container) {
+        console.error('gallery-list container not found');
+        return;
+      }
+      container.innerHTML = galleryData.map((item, index) => `
+        <div class="image-item">
+          <img src="${item.thumbnail || item.src}" alt="${item.alt}">
+          <div class="image-item-info">
+            <div class="image-item-name">${item.alt}</div>
+            <div class="image-item-size">Программа: ${item.program}</div>
+            <div class="actions" style="margin-top: 10px; display: flex; gap: 10px; justify-content: space-between;">
+              <button class="btn btn-secondary btn-small" onclick="editGalleryItem(${index})">✏️</button>
+              <button class="btn btn-danger btn-small" onclick="deleteGalleryItem(${index})" style="background: #F56565; color: white; border: none;">✕</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function showAddGalleryForm() {
+      document.getElementById('gallery-form').reset();
+      document.getElementById('gallery-index').value = '';
+      document.getElementById('gallery-modal-title').textContent = 'Добавить изображение в галерею';
+      openModal('gallery-modal');
+    }
+    
+    function editGalleryItem(index) {
+      const item = galleryData[index];
+      
+      document.getElementById('gallery-index').value = index;
+      document.getElementById('gallery-image').value = item.image || item.src || '';
+      document.getElementById('gallery-thumbnail').value = item.thumbnail || '';
+      document.getElementById('gallery-alt').value = item.alt;
+      document.getElementById('gallery-program').value = item.program;
+      
+      updateImagePickerPreview('gallery-image');
+      updateImagePickerPreview('gallery-thumbnail');
+      
+      document.getElementById('gallery-modal-title').textContent = 'Редактировать изображение';
+      openModal('gallery-modal');
+    }
+    
+    async function saveGalleryItem(event) {
+      event.preventDefault();
+      
+      const index = document.getElementById('gallery-index').value;
+      const imageValue = document.getElementById('gallery-image').value;
+      const thumbnailValue = document.getElementById('gallery-thumbnail').value;
+      
+      const item = {
+        image: imageValue,
+        src: imageValue, // Для совместимости со старым форматом
+        thumbnail: thumbnailValue,
+        alt: document.getElementById('gallery-alt').value,
+        program: document.getElementById('gallery-program').value
+      };
+      
+      // Если редактируем существующий элемент, сохраняем его id и order
+      if (index !== '') {
+        const existingItem = galleryData[index];
+        if (existingItem.id) item.id = existingItem.id;
+        if (existingItem.order) item.order = existingItem.order;
+      } else {
+        // Для нового элемента создаем id и order
+        const maxId = Math.max(0, ...galleryData.map(g => g.id || 0));
+        const maxOrder = Math.max(0, ...galleryData.map(g => g.order || 0));
+        item.id = maxId + 1;
+        item.order = maxOrder + 1;
+      }
+      
+      if (index === '') {
+        galleryData.push(item);
+      } else {
+        galleryData[index] = item;
+      }
+      
+      const saved = await saveJsonToServer('gallery.json', galleryData);
+      
+      if (saved) {
+        renderGallery();
+        closeModal('gallery-modal');
+        showSaveIndicator();
+      }
+    }
+    
+    async function deleteGalleryItem(index) {
+      if (confirm('Удалить это изображение из галереи?')) {
+        galleryData.splice(index, 1);
+        
+        const saved = await saveJsonToServer('gallery.json', galleryData);
+        
+        if (saved) {
+          renderGallery();
+          showSaveIndicator();
+        }
+      }
+    }
+    
+    // JSON Editor functions
+    function loadJsonFile() {
+      const select = document.getElementById('json-file-select');
+      const editor = document.getElementById('json-editor');
+      
+      let data;
+      switch(select.value) {
+        case 'programs':
+          data = programsData;
+          break;
+        case 'testimonials':
+          data = testimonialsData;
+          break;
+        case 'faq':
+          data = faqData;
+          break;
+        case 'gallery':
+          data = galleryData;
+          break;
+      }
+      
+      editor.textContent = JSON.stringify(data, null, 2);
+    }
+    
+    function saveJson() {
+      const select = document.getElementById('json-file-select');
+      const editor = document.getElementById('json-editor');
+      
+      try {
+        const data = JSON.parse(editor.textContent);
+        
+        // Create blob and download
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${select.value}.json`;
+        a.click();
+        
+        showAlert('JSON сохранен! Замените файл в папке data/', 'success');
+      } catch (error) {
+        showAlert('Ошибка: Невалидный JSON - ' + error.message, 'error');
+      }
+    }
+    
+    function downloadJson() {
+      saveJson();
+    }
+    
+
+    
+    // ========== BACKUPS ==========
+    async function loadBackups() {
+      try {
+        const response = await window.GAS_API.call('/api/get-backups');
+        const result = await response.json();
+        
+        if (result.success) {
+          renderBackups(result.backups);
+        } else {
+          showAlert('Ошибка загрузки бэкапов: ' + result.error, 'error');
+        }
+      } catch (error) {
+        showAlert('Ошибка соединения с сервером', 'error');
+        console.error('Load backups error:', error);
+      }
+    }
+    
+    function renderBackups(backups) {
+      const container = document.getElementById('backups-list');
+      
+      if (backups.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">Резервных копий пока нет</p>';
+        return;
+      }
+      
+      // Группируем по оригинальному файлу
+      const grouped = {};
+      backups.forEach(backup => {
+        if (!grouped[backup.original]) {
+          grouped[backup.original] = [];
+        }
+        grouped[backup.original].push(backup);
+      });
+      
+      let html = '';
+      for (const [original, items] of Object.entries(grouped)) {
+        html += `
+          <div class="card" style="margin-bottom: 20px;">
+            <h3>${original}</h3>
+            <div class="item-list">
+        `;
+        
+        items.forEach(backup => {
+          html += `
+            <div class="item-card">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong>${backup.date}</strong>
+                  <p style="color: #666; font-size: 14px; margin-top: 5px;">${backup.size_formatted}</p>
+                </div>
+                <button class="btn btn-secondary btn-small" onclick="restoreBackup('${backup.filename}')">
+                  ↩️ Восстановить
+                </button>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += `
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    async function restoreBackup(backupFilename) {
+      if (!confirm(`Восстановить из резервной копии?\n\nТекущая версия будет сохранена как бэкап.`)) {
+        return;
+      }
+      
+      try {
+        const response = await window.GAS_API.call('/api/restore-backup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            backup_filename: backupFilename
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showAlert(`Восстановлено из бэкапа: ${result.restored_file}`, 'success');
+          // Перезагружаем данные
+          await loadAllData();
+          await loadBackups();
+        } else {
+          showAlert('Ошибка восстановления: ' + result.error, 'error');
+        }
+      } catch (error) {
+        showAlert('Ошибка соединения с сервером', 'error');
+        console.error('Restore error:', error);
+      }
+    }
+    
+    // ========== MEDIA MANAGER ==========
+    let mediaFiles = [];
+    
+    async function loadMedia() {
+      try {
+        const response = await window.GAS_API.call('/api/media');
+        const data = await response.json();
+        
+        if (data.success) {
+          mediaFiles = data.media;
+          renderMediaGrid(mediaFiles);
+          updateMediaStats(data.total);
+        }
+      } catch (error) {
+        console.error('Load media error:', error);
+        showAlert('Ошибка загрузки медиа-библиотеки', 'error');
+      }
+    }
+    
+    function renderMediaGrid(files) {
+      const grid = document.getElementById('mediaGrid');
+      
+      if (files.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Загрузите изображения чтобы начать</p>';
+        return;
+      }
+      
+      grid.innerHTML = files.map(file => `
+        <div class="media-item" onclick="selectMediaFile('${file.filename}')">
+          <img src="${file.versions.thumbnail.webp}" alt="${file.originalName}" loading="lazy">
+          <div class="media-item-actions">
+            <button class="btn-delete" onclick="event.stopPropagation(); deleteMediaFile('${file.filename}')">✕</button>
+          </div>
+          <div class="media-item-info">
+            <div class="media-item-name" title="${file.originalName}">${file.originalName}</div>
+            <div class="media-item-meta">
+              <span>${file.size_formatted}</span>
+              <span>${file.dimensions.width}×${file.dimensions.height}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function updateMediaStats(total) {
+      const statsDiv = document.getElementById('mediaStats');
+      const countSpan = document.getElementById('mediaCount');
+      const sizeSpan = document.getElementById('mediaTotalSize');
+      
+      if (total > 0) {
+        statsDiv.style.display = 'block';
+        countSpan.textContent = total;
+        
+        const totalSize = mediaFiles.reduce((sum, f) => sum + f.size, 0);
+        sizeSpan.textContent = formatBytes(totalSize);
+      } else {
+        statsDiv.style.display = 'none';
+      }
+    }
+    
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    async function uploadMediaFiles(files) {
+      if (!files || files.length === 0) return;
+      
+      showSaveIndicator();
+      
+      for (const file of files) {
+        try {
+          const formData = new FormData();
+          formData.append('image', file);
+          
+          const response = await window.GAS_API.uploadImage(formData);
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            showAlert(`${file.name} загружен успешно`, 'success');
+          } else {
+            showAlert(`Ошибка загрузки ${file.name}: ${data.error}`, 'error');
+          }
+        } catch (error) {
+          console.error('Upload error:', error);
+          showAlert(`Ошибка загрузки ${file.name}`, 'error');
+        }
+      }
+      
+      hideSaveIndicator();
+      await loadMedia();
+    }
+    
+    async function deleteMediaFile(filename) {
+      if (!confirm('Удалить это изображение? Все версии будут удалены.')) {
+        return;
+      }
+      
+      try {
+        const response = await window.GAS_API.call(`/api/media/${filename}`, {
+          method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showAlert('Изображение удалено', 'success');
+          await loadMedia();
+        } else {
+          showAlert('Ошибка удаления: ' + data.error, 'error');
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        showAlert('Ошибка удаления изображения', 'error');
+      }
+    }
+    
+    function selectMediaFile(filename) {
+      const file = mediaFiles.find(f => f.filename === filename);
+      if (!file) return;
+      
+      const info = `
+Файл: ${file.originalName}
+Размер: ${file.size_formatted}
+Разрешение: ${file.dimensions.width}×${file.dimensions.height}
+Дата загрузки: ${new Date(file.uploadDate).toLocaleString('ru-RU')}
+
+Версии:
+• Original: ${file.versions.original}
+• Large: ${file.versions.large.webp}
+• Medium: ${file.versions.medium.webp}
+• Thumbnail: ${file.versions.thumbnail.webp}
+      `.trim();
+      
+      alert(info);
+    }
+    
+    function searchMedia(query) {
+      if (!query) {
+        renderMediaGrid(mediaFiles);
+        return;
+      }
+      
+      const filtered = mediaFiles.filter(f => 
+        f.originalName.toLowerCase().includes(query.toLowerCase()) ||
+        f.filename.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      renderMediaGrid(filtered);
+    }
+    
+    // ========== IMAGE PICKER ==========
+    let currentPickerInputId = null;
+    
+    function openMediaPicker(inputId) {
+      currentPickerInputId = inputId;
+      
+      // Создаем модальное окно для выбора медиа
+      const modal = document.createElement('div');
+      modal.id = 'media-picker-modal';
+      modal.className = 'modal active';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 900px;">
+          <h2>Выбрать изображение</h2>
+          <div style="margin-bottom: 20px;">
+            <input type="text" id="media-picker-search" placeholder="Поиск..." style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px;" oninput="searchMediaPicker(this.value)">
+          </div>
+          <div id="media-picker-grid" class="media-grid" style="max-height: 400px; overflow-y: auto;">
+            <p style="text-align: center; color: #999; padding: 40px;">Загрузка...</p>
+          </div>
+          <div class="actions" style="margin-top: 20px;">
+            <button type="button" class="btn btn-secondary" onclick="closeMediaPicker()">Отмена</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      loadMediaForPicker();
+    }
+    
+    async function loadMediaForPicker() {
+      try {
+        const response = await window.GAS_API.call('/api/media');
+        const data = await response.json();
+        
+        if (data.success) {
+          renderMediaPicker(data.media);
+        }
+      } catch (error) {
+        console.error('Load media error:', error);
+        document.getElementById('media-picker-grid').innerHTML = '<p style="text-align: center; color: #f56565;">Ошибка загрузки медиа</p>';
+      }
+    }
+    
+    function renderMediaPicker(files) {
+      const grid = document.getElementById('media-picker-grid');
+      
+      if (files.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Нет загруженных изображений</p>';
+        return;
+      }
+      
+      grid.innerHTML = files.map(file => `
+        <div class="media-item" onclick="selectMediaForPicker('${file.versions.large.webp}', '${file.originalName}')" style="cursor: pointer;">
+          <img src="${file.versions.thumbnail.webp}" alt="${file.originalName}" loading="lazy">
+          <div class="media-item-info">
+            <div class="media-item-name" title="${file.originalName}">${file.originalName}</div>
+            <div class="media-item-meta">
+              <span>${file.size_formatted}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function searchMediaPicker(query) {
+      // Простой поиск по уже загруженным файлам
+      const items = document.querySelectorAll('#media-picker-grid .media-item');
+      items.forEach(item => {
+        const name = item.querySelector('.media-item-name').textContent.toLowerCase();
+        if (name.includes(query.toLowerCase())) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+    
+    function selectMediaForPicker(path, name) {
+      if (!currentPickerInputId) return;
+      
+      // Устанавливаем путь в input
+      const input = document.getElementById(currentPickerInputId);
+      input.value = path;
+      
+      // Если это поле для миниатюры галереи, автоматически подставляем thumbnail версию
+      if (currentPickerInputId === 'gallery-thumbnail') {
+        // Заменяем /large/ на /thumbnail/ в пути
+        const thumbnailPath = path.replace('/large/', '/thumbnail/');
+        input.value = thumbnailPath;
+        
+        // Показываем превью с thumbnail
+        const preview = document.getElementById(currentPickerInputId + '-preview');
+        if (preview) {
+          preview.innerHTML = `<img src="${thumbnailPath}" alt="${name}">`;
+        }
+      } else {
+        // Показываем превью
+        const preview = document.getElementById(currentPickerInputId + '-preview');
+        if (preview) {
+          preview.innerHTML = `<img src="${path}" alt="${name}">`;
+        }
+      }
+      
+      closeMediaPicker();
+    }
+    
+    function clearImagePicker(inputId) {
+      const input = document.getElementById(inputId);
+      input.value = '';
+      
+      const preview = document.getElementById(inputId + '-preview');
+      if (preview) {
+        preview.innerHTML = '<span class="no-image">Изображение не выбрано</span>';
+      }
+    }
+    
+    function closeMediaPicker() {
+      const modal = document.getElementById('media-picker-modal');
+      if (modal) {
+        modal.remove();
+      }
+      currentPickerInputId = null;
+    }
+    
+    // Обновляем превью при загрузке формы редактирования
+    function updateImagePickerPreview(inputId) {
+      const input = document.getElementById(inputId);
+      const preview = document.getElementById(inputId + '-preview');
+      
+      if (input && preview && input.value) {
+        preview.innerHTML = `<img src="${input.value}" alt="Preview">`;
+      }
+    }
+    
+    // ========== SETTINGS ==========
+    function loadSettings() {
+      if (!settingsData || !settingsData.hero) {
+        settingsData = { hero: { backgroundImage: '', blurAmount: 5, overlayOpacity: 0.6 } };
+      }
+      
+      const hero = settingsData.hero;
+      
+      // Load background image
+      document.getElementById('settings-hero-bg').value = hero.backgroundImage || '';
+      updateImagePickerPreview('settings-hero-bg');
+      
+      // Load blur amount
+      document.getElementById('settings-blur').value = hero.blurAmount || 5;
+      document.getElementById('blur-value').textContent = hero.blurAmount || 5;
+      
+      // Load overlay opacity
+      const overlayPercent = Math.round((hero.overlayOpacity || 0.6) * 100);
+      document.getElementById('settings-overlay').value = overlayPercent;
+      document.getElementById('overlay-value').textContent = overlayPercent;
+    }
+    
+    async function saveSettings() {
+      const backgroundImage = document.getElementById('settings-hero-bg').value;
+      const blurAmount = parseInt(document.getElementById('settings-blur').value);
+      const overlayOpacity = parseInt(document.getElementById('settings-overlay').value) / 100;
+      
+      settingsData = {
+        hero: {
+          backgroundImage: backgroundImage,
+          blurAmount: blurAmount,
+          overlayOpacity: overlayOpacity
+        }
+      };
+      
+      const saved = await saveJsonToServer('settings.json', settingsData);
+      
+      if (saved) {
+        showSaveIndicator();
+        showAlert('Настройки сохранены! Обновите главную страницу чтобы увидеть изменения.', 'success');
+      }
+    }
+    
+    function updateBlurValue(value) {
+      document.getElementById('blur-value').textContent = value;
+    }
+    
+    function updateOverlayValue(value) {
+      document.getElementById('overlay-value').textContent = value;
+    }
+    
+    // ========== INITIALIZE ==========
+    
+    // Debug function
+    function debugAdminLoad() {
+      console.log('=== ADMIN DEBUG ===');
+      console.log('Programs container:', document.getElementById('programs-list'));
+      console.log('Testimonials container:', document.getElementById('testimonials-list'));
+      console.log('FAQ container:', document.getElementById('faq-list'));
+      console.log('Gallery container:', document.getElementById('gallery-list'));
+      console.log('Alert container:', document.getElementById('alert-container'));
+      console.log('Programs data length:', programsData.length);
+      console.log('Testimonials data length:', testimonialsData.length);
+      console.log('FAQ data length:', faqData.length);
+      console.log('Gallery data length:', galleryData.length);
+    }
+    
+    // Initialize with debug
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, initializing admin...');
+      loadAllData().then(() => {
+        debugAdminLoad();
+      });
+      loadJsonFile();
+    });
+    
+    // ========== BLOCKS MANAGER FUNCTIONS ==========
+    
+    let blocksSettings = {};
+    
+    // Load blocks settings with automatic recovery
+    async function loadBlocksSettings() {
+      try {
+        const response = await fetch('data/settings.json');
+        const settings = await response.json();
+        
+        // Check if sections exist and have content
+        if (!settings.sections || Object.keys(settings.sections).length === 0) {
+          showBlocksResult('⚠️ Настройки блоков пусты, восстанавливаем из резервной копии...', 'info');
+          await recoverBlocksFromDefault();
+          return;
+        }
+        
+        blocksSettings = settings.sections;
+        renderBlocksList();
+        showBlocksResult('✅ Настройки блоков загружены успешно', 'success');
+      } catch (error) {
+        console.error('Error loading blocks settings:', error);
+        showBlocksResult('⚠️ Ошибка загрузки настроек, восстанавливаем из резервной копии...', 'info');
+        await recoverBlocksFromDefault();
+      }
+    }
+    
+    // Recover blocks settings from default backup
+    async function recoverBlocksFromDefault() {
+      try {
+        const defaultResponse = await fetch('data/settings-default.json');
+        const defaultSettings = await defaultResponse.json();
+        
+        if (defaultSettings.sections && Object.keys(defaultSettings.sections).length > 0) {
+          blocksSettings = defaultSettings.sections;
+          
+          // Save recovered settings back to main file
+          const currentSettings = await fetch('data/settings.json').then(r => r.json()).catch(() => ({}));
+          const recoveredSettings = {
+            ...currentSettings,
+            sections: defaultSettings.sections
+          };
+          
+          const saved = await saveJsonToServer('settings.json', recoveredSettings);
+          
+          if (saved) {
+            renderBlocksList();
+            showBlocksResult('✅ Настройки блоков восстановлены из резервной копии!', 'success');
+          } else {
+            renderBlocksList();
+            showBlocksResult('⚠️ Настройки восстановлены, но не удалось сохранить. Используйте кнопку "Сохранить настройки".', 'info');
+          }
+        } else {
+          showBlocksResult('❌ Резервная копия также повреждена. Обратитесь к разработчику.', 'error');
+        }
+      } catch (error) {
+        console.error('Error recovering blocks from default:', error);
+        showBlocksResult('❌ Ошибка восстановления из резервной копии: ' + error.message, 'error');
+      }
+    }
+    
+    // Render blocks list
+    function renderBlocksList() {
+      const blocksList = document.getElementById('blocks-list');
+      if (!blocksList) return;
+      
+      const blocksHtml = Object.entries(blocksSettings).map(([key, block]) => `
+        <div class="block-item" style="padding: 20px; background: white; border: 2px solid #eee; border-radius: 12px; transition: all 0.2s; margin-bottom: 16px;">
+          <!-- Header with toggle -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div style="flex: 1;">
+              <h4 style="margin: 0; color: #2D3748; font-size: 18px;">${block.title}</h4>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <button class="btn btn-secondary btn-small" onclick="toggleContentEditor('${key}')" style="padding: 8px 12px;">
+                ✏️
+              </button>
+              <label class="toggle-switch" style="position: relative; display: inline-block; width: 60px; height: 34px;">
+                <input type="checkbox" ${block.enabled ? 'checked' : ''} onchange="toggleBlock('${key}', this.checked)" style="opacity: 0; width: 0; height: 0;">
+                <span class="toggle-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: ${block.enabled ? '#FF6B35' : '#ccc'}; transition: .4s; border-radius: 34px;">
+                  <span style="position: absolute; content: ''; height: 26px; width: 26px; left: ${block.enabled ? '30px' : '4px'}; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                </span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Content editor (hidden by default) -->
+          <div id="content-editor-${key}" class="content-editor" style="display: none; border-top: 2px solid #f0f0f0; padding-top: 16px;">
+            ${renderContentEditor(key, block)}
+            <div style="margin-top: 16px; text-align: right;">
+              <button class="btn btn-primary btn-small" onclick="saveIndividualBlockContent('${key}')" style="margin-right: 8px;">
+                💾 Сохранить изменения
+              </button>
+              <button class="btn btn-secondary btn-small" onclick="toggleContentEditor('${key}')">
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
+      blocksList.innerHTML = blocksHtml;
+    }
+    
+    // Render content editor for specific block
+    function renderContentEditor(blockKey, block) {
+      const content = block.content || {};
+      
+      switch(blockKey) {
+        case 'problemSolution':
+          return `
+            <div class="form-group">
+              <label>Заголовок блока</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="Забудьте о стрессе организации — мы все сделаем за вас">
+            </div>
+            <div class="form-group">
+              <label>Заголовок проблемы</label>
+              <input type="text" id="content-${blockKey}-problemTitle" value="${content.problemTitle || ''}" placeholder="😓 Знакомая ситуация?">
+            </div>
+            <div class="form-group">
+              <label>Текст проблемы</label>
+              <textarea id="content-${blockKey}-problemText" rows="3" placeholder="Скучные выпускные в душном актовом зале...">${content.problemText || ''}</textarea>
+            </div>
+            <div class="form-group">
+              <label>Подзаголовок проблемы</label>
+              <input type="text" id="content-${blockKey}-problemSubtext" value="${content.problemSubtext || ''}" placeholder="А в итоге — стресс вместо праздника">
+            </div>
+            <div class="form-group">
+              <label>Заголовок решения</label>
+              <input type="text" id="content-${blockKey}-solutionTitle" value="${content.solutionTitle || ''}" placeholder="✅ Мы решаем все за вас">
+            </div>
+            <div class="form-group">
+              <label>Текст решения</label>
+              <textarea id="content-${blockKey}-solutionText" rows="3" placeholder="Готовые программы под ключ...">${content.solutionText || ''}</textarea>
+            </div>
+            <div class="form-group">
+              <label>Подзаголовок решения</label>
+              <input type="text" id="content-${blockKey}-solutionSubtext" value="${content.solutionSubtext || ''}" placeholder="Вам остается только наслаждаться счастьем детей">
+            </div>
+          `;
+          
+        case 'programComparison':
+          return `
+            <div class="form-group">
+              <label>Текст подсказки</label>
+              <textarea id="content-${blockKey}-text" rows="2" placeholder="💡 Не можете выбрать? Позвоните нам...">${content.text || ''}</textarea>
+            </div>
+          `;
+          
+        case 'howItWorks':
+          return `
+            <div class="form-group">
+              <label>Заголовок блока</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="Как это работает">
+            </div>
+            <div class="form-group">
+              <label>Шаги (по одному в строке, формат: иконка|заголовок|описание)</label>
+              <textarea id="content-${blockKey}-steps" rows="4" placeholder="1️⃣|Заявка|Оставьте заявку на сайте или позвоните нам">${(content.steps || []).map(step => `${step.icon}|${step.title}|${step.text}`).join('\n')}</textarea>
+              <small style="color: #666;">Каждый шаг на новой строке. Разделитель: | (вертикальная черта)</small>
+            </div>
+          `;
+          
+        case 'socialProof':
+          return `
+            <div class="form-group">
+              <label>Заголовок блока</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="Нам доверяют">
+            </div>
+            <div class="form-group">
+              <label>Статистика (по одной в строке, формат: число|описание)</label>
+              <textarea id="content-${blockKey}-stats" rows="4" placeholder="5+|лет на рынке">${(content.stats || []).map(stat => `${stat.number}|${stat.label}`).join('\n')}</textarea>
+              <small style="color: #666;">Каждая статистика на новой строке. Разделитель: | (вертикальная черта)</small>
+            </div>
+          `;
+          
+        case 'testimonials':
+          return `
+            <div class="form-group">
+              <label>Заголовок блока</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="Отзывы родителей">
+            </div>
+            <div class="form-group">
+              <label>Подзаголовок</label>
+              <input type="text" id="content-${blockKey}-subtitle" value="${content.subtitle || ''}" placeholder="Что говорят о нас те, кто уже провел выпускной с нами">
+            </div>
+          `;
+          
+        case 'gallery':
+          return `
+            <div class="form-group">
+              <label>Заголовок блока</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="Фотографии с наших мероприятий">
+            </div>
+            <div class="form-group">
+              <label>Подзаголовок</label>
+              <input type="text" id="content-${blockKey}-subtitle" value="${content.subtitle || ''}" placeholder="Посмотрите, как проходят наши выпускные">
+            </div>
+          `;
+          
+        case 'faq':
+          return `
+            <div class="form-group">
+              <label>Заголовок блока</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="Частые вопросы">
+            </div>
+            <div class="form-group">
+              <label>Подзаголовок</label>
+              <input type="text" id="content-${blockKey}-subtitle" value="${content.subtitle || ''}" placeholder="Ответы на самые популярные вопросы родителей">
+            </div>
+          `;
+          
+        case 'leadForm':
+          return `
+            <div class="form-group">
+              <label>Заголовок блока</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="Забронируйте выпускной мечты">
+            </div>
+            <div class="form-group">
+              <label>Подзаголовок</label>
+              <input type="text" id="content-${blockKey}-subtitle" value="${content.subtitle || ''}" placeholder="Оставьте заявку, и мы свяжемся с вами в течение 15 минут">
+            </div>
+          `;
+          
+        case 'programComparison':
+          return `
+            <div class="form-group">
+              <label>Текст подсказки</label>
+              <textarea id="content-${blockKey}-text" rows="2" placeholder="💡 Не можете выбрать? Позвоните нам...">${content.text || ''}</textarea>
+            </div>
+          `;
+          
+        case 'faqCta':
+          return `
+            <div class="form-group">
+              <label>Текст вопроса</label>
+              <input type="text" id="content-${blockKey}-text" value="${content.text || ''}" placeholder="Не нашли ответ на свой вопрос?">
+            </div>
+            <div class="form-group">
+              <label>Текст кнопки</label>
+              <input type="text" id="content-${blockKey}-buttonText" value="${content.buttonText || ''}" placeholder="Задать вопрос">
+            </div>
+          `;
+          
+        case 'footerAbout':
+          return `
+            <div class="form-group">
+              <label>Заголовок</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="О компании">
+            </div>
+            <div class="form-group">
+              <label>Текст о компании</label>
+              <textarea id="content-${blockKey}-text" rows="3" placeholder="Организуем незабываемые выпускные...">${content.text || ''}</textarea>
+            </div>
+          `;
+          
+        case 'footerContacts':
+          return `
+            <div class="form-group">
+              <label>Заголовок</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="Контакты">
+            </div>
+            <div class="form-group">
+              <label>Телефон</label>
+              <input type="text" id="content-${blockKey}-phone" value="${content.phone || ''}" placeholder="+7 (999) 123-45-67">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="text" id="content-${blockKey}-email" value="${content.email || ''}" placeholder="info@graduation.ru">
+            </div>
+            <div class="form-group">
+              <label>Режим работы</label>
+              <input type="text" id="content-${blockKey}-schedule" value="${content.schedule || ''}" placeholder="Пн-Вс 9:00-21:00">
+            </div>
+            <div class="form-group">
+              <label>Текст кнопки</label>
+              <input type="text" id="content-${blockKey}-buttonText" value="${content.buttonText || ''}" placeholder="📞 Заказать звонок">
+            </div>
+          `;
+          
+        case 'footerDocuments':
+          return `
+            <div class="form-group">
+              <label>Заголовок</label>
+              <input type="text" id="content-${blockKey}-heading" value="${content.heading || ''}" placeholder="Документы">
+            </div>
+            <div class="form-group">
+              <label>Ссылки на документы (по одной в строке)</label>
+              <textarea id="content-${blockKey}-links" rows="3" placeholder="Политика конфиденциальности">${(content.links || []).join('\n')}</textarea>
+            </div>
+            <div class="form-group">
+              <label>Копирайт</label>
+              <input type="text" id="content-${blockKey}-copyright" value="${content.copyright || ''}" placeholder="© 2024 Выпускной на природе. Все права защищены.">
+            </div>
+            <div class="form-group">
+              <label>Информация о компании</label>
+              <input type="text" id="content-${blockKey}-companyInfo" value="${content.companyInfo || ''}" placeholder="ИП Иванов И.И. | ИНН 123456789012">
+            </div>
+          `;
+          
+        default:
+          return `
+            <div class="form-group">
+              <label>Заголовок блока</label>
+              <input type="text" id="content-${blockKey}-title" value="${block.title || ''}" placeholder="Заголовок">
+            </div>
+            <div class="form-group">
+              <label>Описание блока</label>
+              <textarea id="content-${blockKey}-description" rows="2" placeholder="Описание блока">${block.description || ''}</textarea>
+            </div>
+          `;
+      }
+    }
+    
+    // Toggle content editor visibility
+    function toggleContentEditor(blockKey) {
+      const editor = document.getElementById(`content-editor-${blockKey}`);
+      if (editor) {
+        if (editor.style.display === 'none') {
+          editor.style.display = 'block';
+        } else {
+          editor.style.display = 'none';
+        }
+      }
+    }
+    
+    // Save content changes for a specific block
+    function saveBlockContent(blockKey) {
+      if (!blocksSettings[blockKey]) return;
+      
+      const content = {};
+      
+      switch(blockKey) {
+        case 'problemSolution':
+          content.heading = document.getElementById(`content-${blockKey}-heading`)?.value || '';
+          content.problemTitle = document.getElementById(`content-${blockKey}-problemTitle`)?.value || '';
+          content.problemText = document.getElementById(`content-${blockKey}-problemText`)?.value || '';
+          content.problemSubtext = document.getElementById(`content-${blockKey}-problemSubtext`)?.value || '';
+          content.solutionTitle = document.getElementById(`content-${blockKey}-solutionTitle`)?.value || '';
+          content.solutionText = document.getElementById(`content-${blockKey}-solutionText`)?.value || '';
+          content.solutionSubtext = document.getElementById(`content-${blockKey}-solutionSubtext`)?.value || '';
+          break;
+          
+        case 'programComparison':
+          content.text = document.getElementById(`content-${blockKey}-text`)?.value || '';
+          break;
+          
+        case 'howItWorks':
+          content.heading = document.getElementById(`content-${blockKey}-heading`)?.value || '';
+          const stepsText = document.getElementById(`content-${blockKey}-steps`)?.value || '';
+          content.steps = stepsText.split('\n').filter(line => line.trim()).map(line => {
+            const parts = line.split('|');
+            return {
+              icon: parts[0] || '',
+              title: parts[1] || '',
+              text: parts[2] || ''
+            };
+          });
+          break;
+          
+        case 'socialProof':
+          content.heading = document.getElementById(`content-${blockKey}-heading`)?.value || '';
+          const statsText = document.getElementById(`content-${blockKey}-stats`)?.value || '';
+          content.stats = statsText.split('\n').filter(line => line.trim()).map(line => {
+            const parts = line.split('|');
+            return {
+              number: parts[0] || '',
+              label: parts[1] || ''
+            };
+          });
+          break;
+          
+        case 'testimonials':
+        case 'gallery':
+        case 'faq':
+        case 'leadForm':
+          content.heading = document.getElementById(`content-${blockKey}-heading`)?.value || '';
+          content.subtitle = document.getElementById(`content-${blockKey}-subtitle`)?.value || '';
+          break;
+          
+        case 'faqCta':
+          content.text = document.getElementById(`content-${blockKey}-text`)?.value || '';
+          content.buttonText = document.getElementById(`content-${blockKey}-buttonText`)?.value || '';
+          break;
+          
+        case 'footerAbout':
+          content.heading = document.getElementById(`content-${blockKey}-heading`)?.value || '';
+          content.text = document.getElementById(`content-${blockKey}-text`)?.value || '';
+          break;
+          
+        case 'footerContacts':
+          content.heading = document.getElementById(`content-${blockKey}-heading`)?.value || '';
+          content.phone = document.getElementById(`content-${blockKey}-phone`)?.value || '';
+          content.email = document.getElementById(`content-${blockKey}-email`)?.value || '';
+          content.schedule = document.getElementById(`content-${blockKey}-schedule`)?.value || '';
+          content.buttonText = document.getElementById(`content-${blockKey}-buttonText`)?.value || '';
+          break;
+          
+        case 'footerDocuments':
+          content.heading = document.getElementById(`content-${blockKey}-heading`)?.value || '';
+          const linksText = document.getElementById(`content-${blockKey}-links`)?.value || '';
+          content.links = linksText.split('\n').filter(line => line.trim());
+          content.copyright = document.getElementById(`content-${blockKey}-copyright`)?.value || '';
+          content.companyInfo = document.getElementById(`content-${blockKey}-companyInfo`)?.value || '';
+          break;
+          
+        default:
+          content.title = document.getElementById(`content-${blockKey}-title`)?.value || '';
+          content.description = document.getElementById(`content-${blockKey}-description`)?.value || '';
+          break;
+      }
+      
+      // Update blocks settings
+      blocksSettings[blockKey].content = content;
+      
+      return content;
+    }
+    
+    // Save all block content changes
+    function saveAllBlockContent() {
+      Object.keys(blocksSettings).forEach(blockKey => {
+        saveBlockContent(blockKey);
+      });
+    }
+    
+    // Save individual block content
+    async function saveIndividualBlockContent(blockKey) {
+      try {
+        // Save content for this block
+        saveBlockContent(blockKey);
+        
+        // Get current settings
+        const currentSettings = await fetch('data/settings.json').then(r => r.json());
+        
+        // Update sections
+        currentSettings.sections = blocksSettings;
+        
+        // Save updated settings
+        const saved = await saveJsonToServer('settings.json', currentSettings);
+        
+        if (saved) {
+          showBlocksResult(`✅ Контент блока "${blocksSettings[blockKey].title}" сохранен!`, 'success');
+          
+          // Close the editor
+          toggleContentEditor(blockKey);
+        }
+      } catch (error) {
+        showBlocksResult('❌ Ошибка сохранения: ' + error.message, 'error');
+      }
+    }
+    
+    // Toggle block
+    function toggleBlock(blockKey, enabled) {
+      if (blocksSettings[blockKey]) {
+        blocksSettings[blockKey].enabled = enabled;
+        
+        // Update toggle appearance
+        const toggles = document.querySelectorAll('.toggle-slider');
+        const blockItems = document.querySelectorAll('.block-item');
+        
+        // Find the right toggle and update its appearance
+        Object.keys(blocksSettings).forEach((key, index) => {
+          if (key === blockKey && toggles[index]) {
+            const slider = toggles[index];
+            const knob = slider.querySelector('span');
+            
+            if (enabled) {
+              slider.style.backgroundColor = '#FF6B35';
+              knob.style.left = '30px';
+              blockItems[index].style.borderColor = '#FF6B35';
+              blockItems[index].style.backgroundColor = '#fff8f5';
+            } else {
+              slider.style.backgroundColor = '#ccc';
+              knob.style.left = '4px';
+              blockItems[index].style.borderColor = '#eee';
+              blockItems[index].style.backgroundColor = 'white';
+            }
+          }
+        });
+      }
+    }
+    
+    // Show blocks result
+    function showBlocksResult(message, type = 'info') {
+      const result = document.getElementById('blocks-result');
+      const colors = {
+        success: '#d4edda',
+        error: '#f8d7da',
+        info: '#d1ecf1'
+      };
+      const textColors = {
+        success: '#155724',
+        error: '#721c24',
+        info: '#0c5460'
+      };
+      
+      result.innerHTML = `
+        <div style="padding: 15px; border-radius: 8px; background: ${colors[type]}; color: ${textColors[type]}; border: 1px solid ${colors[type]};">
+          ${message}
+        </div>
+      `;
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        result.innerHTML = '';
+      }, 5000);
+    }
+    
+    // Save blocks settings
+    async function saveBlocksSettings() {
+      try {
+        showBlocksResult('⏳ Сохраняем настройки...', 'info');
+        
+        // Save all content changes first
+        saveAllBlockContent();
+        
+        // Get current settings
+        const currentSettings = await fetch('data/settings.json').then(r => r.json());
+        
+        // Update sections
+        currentSettings.sections = blocksSettings;
+        
+        // Save updated settings
+        const saved = await saveJsonToServer('settings.json', currentSettings);
+        
+        if (saved) {
+          showBlocksResult('✅ Настройки и контент сохранены! Обновите страницу лендинга для просмотра изменений.', 'success');
+        }
+      } catch (error) {
+        showBlocksResult('❌ Ошибка сохранения: ' + error.message, 'error');
+      }
+    }
+    
+    // Reset blocks settings to default
+    async function resetBlocksSettings() {
+      if (!confirm('Вы уверены, что хотите сбросить все настройки к умолчанию? Все блоки будут включены.')) {
+        return;
+      }
+      
+      try {
+        showBlocksResult('⏳ Сбрасываем к умолчанию...', 'info');
+        
+        // Reset all blocks to enabled
+        Object.keys(blocksSettings).forEach(key => {
+          blocksSettings[key].enabled = true;
+        });
+        
+        // Re-render
+        renderBlocksList();
+        
+        // Save
+        await saveBlocksSettings();
+      } catch (error) {
+        showBlocksResult('❌ Ошибка сброса: ' + error.message, 'error');
+      }
+    }
+    
+    // Create backup of current blocks settings
+    async function createBlocksBackup() {
+      try {
+        showBlocksResult('⏳ Создаем резервную копию...', 'info');
+        
+        // Get current settings
+        const currentSettings = await fetch('data/settings.json').then(r => r.json());
+        
+        // Save as backup
+        const saved = await saveJsonToServer('settings-backup.json', currentSettings);
+        
+        if (saved) {
+          showBlocksResult('✅ Резервная копия создана успешно!', 'success');
+        }
+      } catch (error) {
+        showBlocksResult('❌ Ошибка создания резервной копии: ' + error.message, 'error');
+      }
+    }
+    
+    // Validate blocks integrity
+    async function validateBlocksIntegrity() {
+      try {
+        showBlocksResult('⏳ Проверяем целостность данных...', 'info');
+        
+        const response = await fetch('data/settings.json');
+        const settings = await response.json();
+        
+        const requiredBlocks = [
+          'problemSolution', 'programs', 'programComparison', 'howItWorks', 
+          'socialProof', 'testimonials', 'gallery', 'faq', 'faqCta', 
+          'leadForm', 'footerAbout', 'footerContacts', 'footerDocuments'
+        ];
+        
+        const missingBlocks = [];
+        const corruptedBlocks = [];
+        
+        if (!settings.sections) {
+          showBlocksResult('❌ Критическая ошибка: секция "sections" отсутствует!', 'error');
+          return;
+        }
+        
+        requiredBlocks.forEach(blockKey => {
+          if (!settings.sections[blockKey]) {
+            missingBlocks.push(blockKey);
+          } else if (!settings.sections[blockKey].title || typeof settings.sections[blockKey].enabled !== 'boolean') {
+            corruptedBlocks.push(blockKey);
+          }
+        });
+        
+        if (missingBlocks.length === 0 && corruptedBlocks.length === 0) {
+          showBlocksResult('✅ Целостность данных подтверждена! Все блоки на месте.', 'success');
+        } else {
+          let message = '⚠️ Обнаружены проблемы:\n';
+          if (missingBlocks.length > 0) {
+            message += `Отсутствующие блоки: ${missingBlocks.join(', ')}\n`;
+          }
+          if (corruptedBlocks.length > 0) {
+            message += `Поврежденные блоки: ${corruptedBlocks.join(', ')}\n`;
+          }
+          message += 'Рекомендуется принудительное восстановление.';
+          showBlocksResult(message, 'error');
+        }
+      } catch (error) {
+        showBlocksResult('❌ Ошибка проверки целостности: ' + error.message, 'error');
+      }
+    }
+    
+    // Force recovery from default settings
+    async function forceRecoveryFromDefault() {
+      if (!confirm('Принудительное восстановление заменит все текущие настройки блоков на значения по умолчанию. Продолжить?')) {
+        return;
+      }
+      
+      try {
+        showBlocksResult('⏳ Выполняем принудительное восстановление...', 'info');
+        
+        // Force recovery
+        await recoverBlocksFromDefault();
+        
+      } catch (error) {
+        showBlocksResult('❌ Ошибка принудительного восстановления: ' + error.message, 'error');
+      }
+    }
+    
+    // Tab switching with blocks manager integration
+    function switchTab(tabName, buttonElement) {
+      // Update active tab button
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Add active class to clicked button
+      const clickedButton = buttonElement || (window.event && window.event.target);
+      if (clickedButton) {
+        clickedButton.classList.add('active');
+      } else {
+        // Fallback: find button by tab name
+        const buttons = document.querySelectorAll('.tab');
+        buttons.forEach(btn => {
+          if (btn.onclick && btn.onclick.toString().includes(`'${tabName}'`)) {
+            btn.classList.add('active');
+          }
+        });
+      }
+      
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show target tab
+      const targetTab = document.getElementById(tabName + '-tab');
+      if (targetTab) {
+        targetTab.classList.add('active');
+      }
+      
+      // Load specific tab data
+      if (tabName === 'programs') {
+        // Programs tab is loaded on page load
+      } else if (tabName === 'testimonials') {
+        // Testimonials tab is loaded on page load
+      } else if (tabName === 'faq') {
+        // FAQ tab is loaded on page load
+      } else if (tabName === 'gallery') {
+        // Gallery tab is loaded on page load
+      } else if (tabName === 'blocks-manager') {
+        setTimeout(() => {
+          loadBlocksSettings();
+          // Auto-validate integrity when opening blocks manager
+          setTimeout(validateBlocksIntegrity, 1000);
+        }, 100);
+      } else if (tabName === 'integrations') {
+        loadIntegrationsSettings();
+      } else if (tabName === 'settings') {
+        loadSettings();
+      } else if (tabName === 'media') {
+        loadMedia();
+      } else if (tabName === 'backups') {
+        loadBackups();
+      } else if (tabName === 'json') {
+        loadJsonFile();
+      }
+    }
+    
+    // ========== INTEGRATIONS ==========
+    
+    let integrationsData = {
+      bitrix24: {
+        webhookUrl: '',
+        fallbackEmail: 'info@graduation.ru'
+      },
+      analytics: {
+        yandexMetrikaId: '',
+        enabled: false
+      },
+      email: {
+        smtpServer: '',
+        smtpPort: 587,
+        smtpSecure: true,
+        smtpFrom: '',
+        smtpUsername: '',
+        smtpPassword: ''
+      }
+    };
+    
+    // Load integrations settings
+    async function loadIntegrationsSettings() {
+      try {
+        const response = await fetch('data/integrations.json');
+        const data = await response.json();
+        integrationsData = { ...integrationsData, ...data };
+        
+        // Fill form fields
+        document.getElementById('bitrix-webhook-url').value = integrationsData.bitrix24.webhookUrl || '';
+        document.getElementById('bitrix-fallback-email').value = integrationsData.bitrix24.fallbackEmail || '';
+        
+        document.getElementById('yandex-metrika-id').value = integrationsData.analytics.yandexMetrikaId || '';
+        document.getElementById('analytics-enabled').checked = integrationsData.analytics.enabled || false;
+        
+        document.getElementById('smtp-server').value = integrationsData.email.smtpServer || '';
+        document.getElementById('smtp-port').value = integrationsData.email.smtpPort || 587;
+        document.getElementById('smtp-secure').checked = integrationsData.email.smtpSecure !== false;
+        document.getElementById('smtp-from').value = integrationsData.email.smtpFrom || '';
+        document.getElementById('smtp-username').value = integrationsData.email.smtpUsername || '';
+        document.getElementById('smtp-password').value = integrationsData.email.smtpPassword || '';
+        
+        updateIntegrationsStatus();
+        showIntegrationsResult('✅ Настройки интеграций загружены', 'success');
+        
+      } catch (error) {
+        console.log('Integrations config not found, using defaults');
+        updateIntegrationsStatus();
+        showIntegrationsResult('ℹ️ Файл настроек не найден, используются значения по умолчанию', 'info');
+      }
+    }
+    
+    // Update integrations status indicators
+    function updateIntegrationsStatus() {
+      const bitrixStatus = document.getElementById('bitrix-status');
+      const analyticsStatus = document.getElementById('analytics-status');
+      const emailStatus = document.getElementById('email-status');
+      
+      // Bitrix24 status
+      if (integrationsData.bitrix24.webhookUrl) {
+        bitrixStatus.innerHTML = '✅ Настроено';
+        bitrixStatus.style.color = '#28a745';
+      } else {
+        bitrixStatus.innerHTML = '❌ Не настроено';
+        bitrixStatus.style.color = '#dc3545';
+      }
+      
+      // Analytics status
+      if (integrationsData.analytics.yandexMetrikaId && integrationsData.analytics.enabled) {
+        analyticsStatus.innerHTML = '✅ Активно';
+        analyticsStatus.style.color = '#28a745';
+      } else if (integrationsData.analytics.yandexMetrikaId) {
+        analyticsStatus.innerHTML = '⚠️ Настроено, но отключено';
+        analyticsStatus.style.color = '#ffc107';
+      } else {
+        analyticsStatus.innerHTML = '❌ Не настроено';
+        analyticsStatus.style.color = '#dc3545';
+      }
+      
+      // Email status
+      if (integrationsData.email.smtpServer && integrationsData.email.smtpFrom) {
+        emailStatus.innerHTML = '✅ Настроено';
+        emailStatus.style.color = '#28a745';
+      } else {
+        emailStatus.innerHTML = '❌ Не настроено';
+        emailStatus.style.color = '#dc3545';
+      }
+    }
+    
+    // Show integrations result message
+    function showIntegrationsResult(message, type = 'info') {
+      const result = document.getElementById('integrations-result');
+      const colors = {
+        success: '#d4edda',
+        error: '#f8d7da',
+        info: '#d1ecf1'
+      };
+      const textColors = {
+        success: '#155724',
+        error: '#721c24',
+        info: '#0c5460'
+      };
+      
+      result.innerHTML = `
+        <div style="padding: 15px; border-radius: 8px; background: ${colors[type]}; color: ${textColors[type]}; border: 1px solid ${colors[type]};">
+          ${message}
+        </div>
+      `;
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        result.innerHTML = '';
+      }, 5000);
+    }
+    
+    // Save Bitrix24 settings
+    async function saveBitrix24Settings() {
+      try {
+        integrationsData.bitrix24 = {
+          webhookUrl: document.getElementById('bitrix-webhook-url').value.trim(),
+          fallbackEmail: document.getElementById('bitrix-fallback-email').value.trim()
+        };
+        
+        const saved = await saveJsonToServer('integrations.json', integrationsData);
+        
+        if (saved) {
+          updateIntegrationsStatus();
+          showIntegrationsResult('✅ Настройки Bitrix24 сохранены!', 'success');
+          showSaveIndicator();
+        }
+      } catch (error) {
+        showIntegrationsResult('❌ Ошибка сохранения настроек Bitrix24: ' + error.message, 'error');
+      }
+    }
+    
+    // Test Bitrix24 connection
+    async function testBitrix24Connection() {
+      const webhookUrl = document.getElementById('bitrix-webhook-url').value.trim();
+      
+      if (!webhookUrl) {
+        showIntegrationsResult('❌ Введите URL webhook для тестирования', 'error');
+        return;
+      }
+      
+      // Проверяем формат URL
+      if (!webhookUrl.includes('bitrix24') || !webhookUrl.includes('/rest/')) {
+        showIntegrationsResult('❌ Неверный формат URL. Должен быть: https://domain.bitrix24.ru/rest/userId/code/', 'error');
+        return;
+      }
+      
+      showIntegrationsResult('⏳ Тестируем подключение к Bitrix24...', 'info');
+      
+      try {
+        // Добавляем метод API для тестирования
+        const testUrl = webhookUrl + (webhookUrl.endsWith('/') ? '' : '/') + 'crm.lead.list?SELECT[]=ID&FILTER[ID]=1';
+        
+        const response = await fetch(testUrl, {
+          method: 'GET',
+          mode: 'cors'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.error) {
+            showIntegrationsResult(`❌ Ошибка API Bitrix24: ${data.error_description || data.error}`, 'error');
+          } else {
+            showIntegrationsResult('✅ Подключение к Bitrix24 успешно!', 'success');
+          }
+        } else {
+          showIntegrationsResult(`❌ Ошибка подключения: ${response.status} ${response.statusText}`, 'error');
+        }
+      } catch (error) {
+        showIntegrationsResult('❌ Ошибка тестирования: ' + error.message, 'error');
+      }
+    }
+    
+    // Save Analytics settings
+    async function saveAnalyticsSettings() {
+      try {
+        integrationsData.analytics = {
+          yandexMetrikaId: document.getElementById('yandex-metrika-id').value.trim(),
+          enabled: document.getElementById('analytics-enabled').checked
+        };
+        
+        const saved = await saveJsonToServer('integrations.json', integrationsData);
+        
+        if (saved) {
+          updateIntegrationsStatus();
+          showIntegrationsResult('✅ Настройки аналитики сохранены!', 'success');
+          showSaveIndicator();
+        }
+      } catch (error) {
+        showIntegrationsResult('❌ Ошибка сохранения настроек аналитики: ' + error.message, 'error');
+      }
+    }
+    
+    // Save Email settings
+    async function saveEmailSettings() {
+      try {
+        integrationsData.email = {
+          smtpServer: document.getElementById('smtp-server').value.trim(),
+          smtpPort: parseInt(document.getElementById('smtp-port').value) || 587,
+          smtpSecure: document.getElementById('smtp-secure').checked,
+          smtpFrom: document.getElementById('smtp-from').value.trim(),
+          smtpUsername: document.getElementById('smtp-username').value.trim(),
+          smtpPassword: document.getElementById('smtp-password').value.trim()
+        };
+        
+        const saved = await saveJsonToServer('integrations.json', integrationsData);
+        
+        if (saved) {
+          updateIntegrationsStatus();
+          showIntegrationsResult('✅ Настройки email сохранены!', 'success');
+          showSaveIndicator();
+        }
+      } catch (error) {
+        showIntegrationsResult('❌ Ошибка сохранения настроек email: ' + error.message, 'error');
+      }
+    }
+    
+    // Test Email connection
+    async function testEmailConnection() {
+      const server = document.getElementById('smtp-server').value.trim();
+      const from = document.getElementById('smtp-from').value.trim();
+      
+      if (!server || !from) {
+        showIntegrationsResult('❌ Заполните SMTP сервер и email отправителя для тестирования', 'error');
+        return;
+      }
+      
+      showIntegrationsResult('⏳ Тестируем email настройки...', 'info');
+      
+      // В реальном проекте здесь был бы запрос к серверу для тестирования SMTP
+      // Пока что просто симулируем успешный тест
+      setTimeout(() => {
+        showIntegrationsResult('✅ Настройки email корректны (симуляция теста)', 'success');
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
