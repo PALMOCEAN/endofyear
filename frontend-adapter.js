@@ -31,6 +31,7 @@ async function apiCall(endpoint, options = {}) {
 
 /**
  * Адаптированные вызовы для Google Apps Script
+ * Использует JSONP для обхода CORS на GitHub Pages
  */
 async function gasApiCall(endpoint, options = {}) {
   const method = options.method || 'GET';
@@ -86,27 +87,69 @@ async function gasApiCall(endpoint, options = {}) {
       }
   }
   
-  // Формируем запрос к GAS
-  // Используем GET запросы для всех операций чтобы обойти CORS проблемы
-  const url = new URL(GAS_CONFIG.GAS_URL);
-  url.searchParams.set('action', action);
-  
-  // Добавляем параметры в URL
-  if (params && Object.keys(params).length > 0) {
-    Object.keys(params).forEach(key => {
-      if (typeof params[key] === 'object') {
-        // Для объектов используем JSON строку
-        url.searchParams.set(key, JSON.stringify(params[key]));
-      } else {
-        url.searchParams.set(key, params[key]);
+  // Используем JSONP для обхода CORS на GitHub Pages
+  return gasJsonpRequest(action, params);
+}
+
+/**
+ * JSONP запрос к Google Apps Script для обхода CORS
+ */
+function gasJsonpRequest(action, params = {}) {
+  return new Promise((resolve, reject) => {
+    // Создаем уникальное имя callback функции
+    const callbackName = 'gasCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Создаем глобальную callback функцию
+    window[callbackName] = function(data) {
+      // Очищаем после использования
+      delete window[callbackName];
+      document.head.removeChild(script);
+      
+      // Эмулируем Response объект для совместимости
+      resolve({
+        ok: true,
+        json: () => Promise.resolve(data),
+        text: () => Promise.resolve(JSON.stringify(data))
+      });
+    };
+    
+    // Формируем URL с параметрами
+    const url = new URL(GAS_CONFIG.GAS_URL);
+    url.searchParams.set('action', action);
+    url.searchParams.set('callback', callbackName);
+    
+    // Добавляем параметры в URL
+    if (params && Object.keys(params).length > 0) {
+      Object.keys(params).forEach(key => {
+        if (typeof params[key] === 'object') {
+          url.searchParams.set(key, JSON.stringify(params[key]));
+        } else {
+          url.searchParams.set(key, params[key]);
+        }
+      });
+    }
+    
+    console.log('GAS JSONP request URL:', url.toString());
+    
+    // Создаем script тег для JSONP
+    const script = document.createElement('script');
+    script.src = url.toString();
+    script.onerror = () => {
+      delete window[callbackName];
+      document.head.removeChild(script);
+      reject(new Error('JSONP request failed'));
+    };
+    
+    // Таймаут для запроса
+    setTimeout(() => {
+      if (window[callbackName]) {
+        delete window[callbackName];
+        document.head.removeChild(script);
+        reject(new Error('JSONP request timeout'));
       }
-    });
-  }
-  
-  console.log('GAS request URL:', url.toString());
-  
-  return fetch(url.toString(), {
-    method: 'GET'
+    }, 30000); // 30 секунд таймаут
+    
+    document.head.appendChild(script);
   });
 }
 
