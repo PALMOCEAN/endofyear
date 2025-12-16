@@ -6,7 +6,7 @@
 // Конфигурация GAS
 const GAS_CONFIG = {
   // Замените на URL вашего развернутого GAS веб-приложения
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbxN_p54pB5ouyUkH83eibavJfxKuve4POEap_md_f2XSHa5UsVMQMUws_df89jrjN-gYg/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbz7dQ_DIvs88HtRwKBLAD_PHqHY9bZ0jtwqHyENOkaG8RbUe1o9vKPT28FGSZ72-SM-hw/exec',
   
   // Для разработки можно использовать локальный сервер
   USE_LOCAL_SERVER: false,
